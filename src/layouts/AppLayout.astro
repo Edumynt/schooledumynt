@@ -1,0 +1,163 @@
+---
+import Header from '../components/Header.astro';
+import BottomNav from '../components/BottomNav.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Edumynt',
+  description = 'Learn smarter with Edumynt',
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
+
+    <!-- PWA -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Edumynt" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <ClientRouter />
+
+    <!-- Prevent flash of wrong theme -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('edumynt-theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div class="app-shell" id="app-shell">
+
+      <!-- Backdrop overlay (for sidebar) -->
+      <div class="overlay" id="overlay" aria-hidden="true"></div>
+
+      <!-- Top header -->
+      <Header />
+
+      <!-- Left slide-in sidebar -->
+      <Sidebar currentPath={currentPath} />
+
+      <!-- Page content -->
+      <main class="app-content" id="main-content">
+        <div class="app-content__inner">
+          <slot />
+        </div>
+      </main>
+
+      <!-- Bottom navigation -->
+      <BottomNav currentPath={currentPath} />
+
+    </div>
+
+    <script>
+      function initApp() {
+        const shell   = document.getElementById('app-shell')!;
+        const overlay = document.getElementById('overlay')!;
+
+        /* ---- Sidebar ---- */
+        function openSidebar() {
+          shell.setAttribute('data-sidebar', 'open');
+          overlay.classList.add('is-active');
+          document.getElementById('sidebar')?.removeAttribute('aria-hidden');
+          document.getElementById('sidebar-toggle')?.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeSidebar() {
+          shell.removeAttribute('data-sidebar');
+          overlay.classList.remove('is-active');
+          document.getElementById('sidebar')?.setAttribute('aria-hidden', 'true');
+          document.getElementById('sidebar-toggle')?.setAttribute('aria-expanded', 'false');
+        }
+
+        document.getElementById('sidebar-toggle')?.addEventListener('click', openSidebar);
+        document.getElementById('sidebar-close')?.addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        /* ---- Settings dropdown ---- */
+        function openSettings() {
+          shell.setAttribute('data-settings', 'open');
+          document.getElementById('settings-panel')?.removeAttribute('aria-hidden');
+          document.getElementById('settings-toggle')?.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeSettings() {
+          shell.removeAttribute('data-settings');
+          document.getElementById('settings-panel')?.setAttribute('aria-hidden', 'true');
+          document.getElementById('settings-toggle')?.setAttribute('aria-expanded', 'false');
+        }
+
+        document.getElementById('settings-toggle')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          shell.hasAttribute('data-settings') ? closeSettings() : openSettings();
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!document.getElementById('settings-panel')?.contains(e.target as Node)) {
+            closeSettings();
+          }
+        });
+
+        document.getElementById('settings-panel')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+
+        // Close sidebar on nav link click
+        document.querySelectorAll('.sidebar__link').forEach((link) => {
+          link.addEventListener('click', closeSidebar);
+        });
+
+        /* ---- Dark mode toggle ---- */
+        const toggle = document.getElementById('dark-mode-toggle') as HTMLInputElement | null;
+
+        function applyTheme(theme: string) {
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('edumynt-theme', theme);
+          const metaTheme = document.getElementById('theme-color-meta');
+          if (metaTheme) metaTheme.setAttribute('content', theme === 'dark' ? '#161b22' : '#ffffff');
+        }
+
+        if (toggle) {
+          toggle.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+          // Sync meta on load
+          applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+          toggle.addEventListener('change', () => {
+            applyTheme(toggle.checked ? 'dark' : 'light');
+          });
+        }
+
+        /* ---- ESC closes panels ---- */
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') { closeSidebar(); closeSettings(); }
+        });
+      }
+
+      // Run on first load and after every client-side navigation
+      document.addEventListener('astro:page-load', initApp);
+    </script>
+  </body>
+</html>

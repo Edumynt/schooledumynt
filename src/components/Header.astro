@@ -1,0 +1,177 @@
+---
+---
+<header class="header" role="banner">
+  <div class="header__inner">
+
+    <!-- Left: Sidebar toggle -->
+    <button
+      class="icon-btn"
+      id="sidebar-toggle"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="sidebar"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Center: Brand -->
+    <a href="/" class="header__brand" aria-label="Edumynt — Home">
+      <span class="header__brand-text">Edumynt</span>
+    </a>
+
+    <!-- Right: Settings -->
+    <button
+      class="icon-btn"
+      id="settings-toggle"
+      aria-label="Open settings"
+      aria-expanded="false"
+      aria-controls="settings-panel"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Settings dropdown panel -->
+  <div
+    class="settings-dropdown"
+    id="settings-panel"
+    role="dialog"
+    aria-label="Settings"
+    aria-hidden="true"
+  >
+    <div class="settings-dropdown__header">
+      <span class="settings-dropdown__title">Settings</span>
+    </div>
+    <div class="settings-dropdown__body">
+      <div class="settings-row">
+        <div class="settings-row__info">
+          <span class="settings-row__label">Dark mode</span>
+          <span class="settings-row__desc">Switch to dark theme</span>
+        </div>
+        <label class="toggle" aria-label="Toggle dark mode">
+          <input class="toggle__input" type="checkbox" id="dark-mode-toggle" role="switch" />
+          <span class="toggle__track">
+            <span class="toggle__thumb"></span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--color-bg-nav);
+    box-shadow: var(--shadow-header);
+    z-index: var(--z-header);
+    transition: background var(--transition-base);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 var(--space-3);
+  }
+
+  .header__brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .header__brand-text {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  /* Settings Dropdown */
+  .settings-dropdown {
+    position: absolute;
+    top: calc(var(--header-height) + var(--space-2));
+    right: var(--space-3);
+    width: 260px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-dropdown);
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top right;
+    transition:
+      opacity var(--transition-fast),
+      visibility var(--transition-fast),
+      transform var(--transition-fast);
+    overflow: hidden;
+  }
+
+  /* Open state — controlled by [data-settings="open"] on #app-shell */
+  :global([data-settings="open"]) .settings-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  .settings-dropdown__header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .settings-dropdown__title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+  }
+
+  .settings-dropdown__body {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-1) 0;
+  }
+
+  .settings-row__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0-5);
+  }
+
+  .settings-row__label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text-primary);
+  }
+
+  .settings-row__desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+</style>
